@@ -1,0 +1,55 @@
+<!-- login.html -->
+
+{% extends 'base.html' %}
+{% block title %}
+    <title>Cluster Table</title>
+{% endblock %}
+
+{% block content %}
+
+    
+    <form method="POST" action="/add_cluster">
+        <div class="container-md">
+            <h3>Cluster Table</h2>
+                <div class="mb-3"> 
+                    <label for="data_center_location" class="form-label">Data Center Location</label>
+                    <input type="text" name="data_center_location" class="form-control" id="data_center_location" aria-describedby="DC-Location" placeholder="N1/N2/BLR" required>
+                    <!-- <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div> -->
+                  </div>
+
+                  <div class="mb-3"> 
+                    <label for="cluster_type" class="form-label">Cluster Type</label>
+                    <input type="text" name="cluster_type" class="form-control" id="cluster_type" aria-describedby="DC-Type" placeholder="Test/Production/Staging" required>
+                    <!-- <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div> -->
+                  </div>
+
+                  <div class="mb-3"> 
+                    <label for="cluster_api_address" class="form-label">Cluster API</label>
+                    <input type="text" name="cluster_api_address" class="form-control" id="cluster_api_address" aria-describedby="DC-Type" placeholder="https://api.your-cluster.airtel.itm" required>
+                    <!-- <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div> -->
+                  </div>
+                <button type="submit" class="btn btn-outline-primary">Add Cluster</button>
+            </div>
+        </form>
+        </div><br>
+
+
+    <table border="1" class="table table-bordered border-primary">
+        <tr>
+            <th>ID</th>
+            <th>Data Center Location</th>
+            <th>Cluster Type</th>
+            <th>Cluster API Address</th>
+            <th>Remove</th>
+        </tr>
+        {% for cluster in clusters %}
+        <tr>
+            <td>{{ cluster.id }}</td>
+            <td>{{ cluster.data_center_location }}</td>
+            <td>{{ cluster.cluster_type }}</td>
+            <td>{{ cluster.cluster_api_address }}</td>
+            <td><a href="/remove_cluster/{{ cluster.id }}">Remove</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock%}

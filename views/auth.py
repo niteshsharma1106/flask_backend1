@@ -1,7 +1,8 @@
 # views/auth.py
 
 from flask import Blueprint, render_template, redirect, request,session
-from models import db, User
+from flask_login import login_required, current_user, LoginManager
+from models import db, User,login_manager
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -46,7 +47,7 @@ def login():
 
 
 @auth_bp.route('/logout')
-#@login_required  # Apply the login_required decorator
+# @login_required  # Apply the login_required decorator
 def logout():
     # Clear the session to log the user out
     session.clear()
