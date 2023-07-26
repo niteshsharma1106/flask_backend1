@@ -22,7 +22,11 @@
               </button>
               <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
                 <div class="offcanvas-header">
-                  <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">User Name</h5>
+                  {% if 'user_id' in session %}
+                   <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Welcome {{ session['user_name'] }}!</h5>
+                  {% else %}
+                   <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Welcome Guest!</h5>
+                   {% endif %}
                   <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body">
@@ -31,12 +35,19 @@
                       <a class="nav-link active" aria-current="page" href="{{ url_for('home.welcome') }}">Home</a>
                     </li>
                     <li class="nav-item">
+                    {% if not 'user_id' in session %}
                     </li>
                       <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a> 
                     </li>
-                    </li>
-                      <a class="nav-link" href="{{ url_for('auth.register') }}">Registration</a> 
-                    </li>
+                  </li>
+                  <a class="nav-link" href="{{ url_for('auth.register') }}">Registration</a> 
+                  </li>
+                    {% endif %}
+                  {% if 'user_id' in session %}
+                   </li>
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout!</a> 
+                  </li>
+                  {% endif %}  
                     <li class="nav-item dropdown">
                       <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Dropdown

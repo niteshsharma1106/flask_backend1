@@ -38,7 +38,16 @@ def login():
             # Set a session variable to indicate that the user is logged in
             session['user_id'] = user.id
             # You can add a session here for managing user login status
+            # Store the user's name in the session
+            session['user_name'] = user.first_name
             return redirect('/welcome')
 
     return render_template('login.html')
 
+
+@auth_bp.route('/logout')
+#@login_required  # Apply the login_required decorator
+def logout():
+    # Clear the session to log the user out
+    session.clear()
+    return redirect('/welcome')
