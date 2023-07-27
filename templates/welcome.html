@@ -1,0 +1,12 @@
+<!-- welcome.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}
+    <title>Welcome</title>
+{% endblock %}
+
+{% block content %}
+    <h1>Welcome, {{ session['user_name'] }}!</h1>
+    <p>Enjoy your time in the application!</p>
+{% endblock %}

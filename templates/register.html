@@ -8,7 +8,7 @@
 
 {% block content %}
     <h1>Register</h1>
-    <form method="post" action="/register">
+    <form method="post" action="{{ url_for('auth.register') }}">
         <label>First Name:</label>
         <input type="text" name="first_name" required>
         <label>Last Name:</label>
@@ -17,6 +17,12 @@
         <input type="email" name="email" required>
         <label>Password:</label>
         <input type="password" name="password" required>
+        <label>Role:</label>
+        <select name="role" required>
+            {% for role in roles %}
+                <option value="{{ role.id }}">{{ role.name }}</option>
+            {% endfor %}
+        </select>
         <button type="submit">Register</button>
     </form>
 {% endblock %}

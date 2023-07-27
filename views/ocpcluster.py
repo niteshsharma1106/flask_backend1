@@ -35,6 +35,7 @@ def add_cluster():
 @cluster_bp.route('/remove_cluster/<int:cluster_id>', methods=['GET', 'POST'])
 def remove_cluster(cluster_id):
     if 'user_id' in session:
+        
         cluster = Cluster.query.get_or_404(cluster_id)
         db.session.delete(cluster)
         db.session.commit()

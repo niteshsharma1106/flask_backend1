@@ -19,17 +19,21 @@
               <a class="navbar-brand" href="#">
                 <img src="static\logo.png" alt="Avatar Logo" style="width:40px;" class="rounded-pill">
               </a>
-              <!-- <a class="navbar-brand" href="#">Welcome</a> -->
+              {% if 'user_id' in session %}
+                <h5 class="navbar-brand">Welcome {{ session['user_name'] }}!</h5>
+              {% else %}
+                <h5 class="navbar-brand">Welcome Guest!</h5>
+              {% endif %}
               <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasDarkNavbar" aria-controls="offcanvasDarkNavbar" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
               </button>
               <div class="offcanvas offcanvas-end text-bg-dark" tabindex="-1" id="offcanvasDarkNavbar" aria-labelledby="offcanvasDarkNavbarLabel">
                 <div class="offcanvas-header">
                   {% if 'user_id' in session %}
-                   <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Welcome {{ session['user_name'] }}!</h5>
+                    <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Welcome {{ session['user_name'] }}!</h5>
                   {% else %}
-                   <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Welcome Guest!</h5>
-                   {% endif %}
+                    <h5 class="offcanvas-title" id="offcanvasDarkNavbarLabel">Welcome Guest!</h5>
+                  {% endif %}
                   <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                 </div>
                 <div class="offcanvas-body">
@@ -37,34 +41,33 @@
                     <li class="nav-item">
                       <a class="nav-link active" aria-current="page" href="{{ url_for('home.welcome') }}">Home</a>
                     </li>
-                    <li class="nav-item">
                     {% if not 'user_id' in session %}
-                    </li>
-                      <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a> 
-                    </li>
-                  </li>
-                  <a class="nav-link" href="{{ url_for('auth.register') }}">Registration</a> 
-                  </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a> 
+                      </li>
+                      <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.register') }}">Registration</a> 
+                      </li>
                     {% endif %}
-                  {% if 'user_id' in session %}
-                   </li>
-                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout!</a> 
-                    </li>
-                    <li class="nav-item dropdown">
-                      <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        More Actions!
-                      </a>
-                      <ul class="dropdown-menu dropdown-menu-dark">
-                        <li><a class="dropdown-item" href="{{ url_for('cluster.add_cluster') }}">Add Remove Cluster</a></li>
-                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                        <li>
-                          <hr class="dropdown-divider">
-                        </li>
-                        <li><a class="dropdown-item" href="#">Something else here</a></li>
-                      </ul>
-                    </li>
+                    {% if 'user_id' in session %}
+                      <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout!</a> 
+                      </li>
+                      <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          More Actions!
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark">
+                          <li><a class="dropdown-item" href="{{ url_for('cluster.add_cluster') }}">Add Remove Cluster</a></li>
+                          <li><a class="dropdown-item" href="{{ url_for('admin_access.access_requests') }}">Access Requested</a></li>
+                          <li>
+                            <hr class="dropdown-divider">
+                          </li>
+                          <li><a class="dropdown-item" href="#">Something else here</a></li>
+                        </ul>
+                      </li>
+                    {% endif %}
                   </ul>
-                {% endif %}  
                   <form class="d-flex mt-3" role="search">
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
                     <button class="btn btn-success" type="submit">Search</button>
