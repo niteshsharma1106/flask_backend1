@@ -7,6 +7,16 @@
 
 {% block content %}
 
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-danger">
+      <ul>
+          <li>{{ messages }}</li>
+      </ul>
+    </div>
+  {% endif %}
+{% endwith %}
+
     
     <form method="POST" action="/add_cluster">
         <div class="container-md">
@@ -36,18 +46,16 @@
 
     <table border="1" class="table table-bordered border-primary">
         <tr>
-            <th>ID</th>
+            <th>Cluster API Address</th>
             <th>Data Center Location</th>
             <th>Cluster Type</th>
-            <th>Cluster API Address</th>
             <th>Remove</th>
         </tr>
         {% for cluster in clusters %}
         <tr>
-            <td>{{ cluster.id }}</td>
+            <td>{{ cluster.cluster_api_address }}</td>
             <td>{{ cluster.data_center_location }}</td>
             <td>{{ cluster.cluster_type }}</td>
-            <td>{{ cluster.cluster_api_address }}</td>
             <td><a href="/remove_cluster/{{ cluster.id }}">Remove</a></td>
         </tr>
         {% endfor %}

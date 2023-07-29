@@ -2,12 +2,12 @@
 
 from flask import Flask
 from config import DATABASE_URI
-from models import db, login_manager
+from models import db, login_manager,Role,User
 from views.auth import auth_bp
 from views.home import home_bp
 from views.ocpcluster import cluster_bp
+from views.admin import admin_bp
 from flask_login import LoginManager
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -25,10 +25,33 @@ login_manager.login_view = "auth.login"  # The route for the login page
 # Create all the database tables
 with app.app_context():
     db.create_all()
+    Role.create_default_roles()
+        # Check if there are any users in the database
+    if not User.query.first():
+        # If no users exist, create the default admin role
+        admin_role = Role.query.filter_by(name='Admin').first()
+        if not admin_role:
+            admin_role = Role(name='Admin')
+            db.session.add(admin_role)
+            db.session.commit()
+
+        # Create the default admin user
+        default_admin_user = User(
+            first_name='Admin',
+            last_name='User',
+            email='admin@example.com',
+            password='password',  # Replace with the desired default password
+            role=admin_role,
+            force_password_change=True  # Set this flag to force password change on first login
+        )
+        db.session.add(default_admin_user)
+        db.session.commit()
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(home_bp)
 app.register_blueprint(cluster_bp)
+app.register_blueprint(admin_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
