@@ -6,6 +6,15 @@
 {% endblock%}
 
 {% block content %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-danger">
+      <ul>
+          <li>{{ messages }}</li>
+      </ul>
+    </div>
+  {% endif %}
+{% endwith %}
 <form method="post" action="/login">
     <div class="container-md">
           <div class="mb-3"> 

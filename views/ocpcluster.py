@@ -1,7 +1,7 @@
 # views/cluster.py
 
 from flask import Blueprint, render_template, redirect, request,session,flash
-from models import db, Cluster
+from models import db, Cluster, User
 from views.auth import login_required
 
 
@@ -35,11 +35,16 @@ def add_cluster():
 @cluster_bp.route('/remove_cluster/<int:cluster_id>', methods=['GET', 'POST'])
 def remove_cluster(cluster_id):
     if 'user_id' in session:
-        
-        cluster = Cluster.query.get_or_404(cluster_id)
-        db.session.delete(cluster)
-        db.session.commit()
-        # After deleting rows, reset the auto-increment counter
+        user_id = session['user_id']
+        user = User.query.get(user_id)
+        if user.role.name == 'Admin':
+            cluster = Cluster.query.get_or_404(cluster_id)
+            db.session.delete(cluster)
+            db.session.commit()
+            # After deleting rows, reset the auto-increment counter
+        else:
+            print(f'user {user} is not admin')
+            flash('Only Admin can remove the details')
     else:
         return redirect('/login')
     return redirect('/add_cluster')
