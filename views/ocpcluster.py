@@ -1,7 +1,7 @@
 # views/cluster.py
 
 from flask import Blueprint, render_template, redirect, request,session,flash
-from models import db, Cluster, User
+from models import db, Cluster, User,Trident
 from views.auth import login_required
 
 
@@ -11,24 +11,32 @@ cluster_bp = Blueprint('cluster', __name__)
 @cluster_bp.route('/add_cluster', methods=['GET', 'POST'])
 def add_cluster():
     if 'user_id' in session:
-        if request.method == 'POST':
-            data_center_location = request.form['data_center_location']
-            cluster_type = request.form['cluster_type']
-            cluster_api_address = request.form['cluster_api_address']
-            cluster = Cluster(data_center_location=data_center_location, cluster_type=cluster_type, cluster_api_address=cluster_api_address)
-            # Check if the cluster_api_address already exists in the database
-            existing_cluster = Cluster.query.filter_by(cluster_api_address=cluster_api_address).first()
-
-            if existing_cluster:
-                flash('Cluster API address already exists.', 'error')
-                print(f'Cluster API address {cluster_api_address} already exists.', 'error')
-                # Handle duplicate cluster_api_address (e.g., display an error message)
-                # For simplicity, we redirect back to the add_cluster page
-                return redirect('/add_cluster')
-            db.session.add(cluster)
-            db.session.commit()
-        clusters = Cluster.query.all()
-        return render_template('add_cluster.html', clusters=clusters)
+        user_id = session['user_id']
+        user = User.query.get(user_id)
+        if user.role.name == 'Admin':
+            if request.method == 'POST':
+                dcloc = request.form['data_center_location']
+                ctype = request.form['cluster_type']
+                clusterapi = request.form['cluster_api_address']
+                cluster = Cluster(dcloc=dcloc, ctype=ctype, clusterapi=clusterapi)
+                trident = Trident(cluster_id=cluster.id,svmname='',dataLF='')
+                # Check if the cluster_api_address already exists in the database
+                existing_cluster = Cluster.query.filter_by(clusterapi=clusterapi).first()
+                if existing_cluster:
+                    flash('Cluster API address already exists.', 'error')
+                    print(f'Cluster API address {clusterapi} already exists.', 'error')
+                    # Handle duplicate cluster_api_address (e.g., display an error message)
+                    # For simplicity, we redirect back to the add_cluster page
+                    return redirect('/add_cluster')
+                cluster.tridents.append(trident)
+                db.session.add(cluster)
+                db.session.commit()
+            clusters = Cluster.query.all()
+            return render_template('add_cluster.html', clusters=clusters)
+        else:
+            print(f'user {user} is not Admin to add or Remove cluster')
+            flash('Only Admin can remove the details')
+            return redirect('/welcome')
     else:
         return redirect('/login')
 
@@ -38,8 +46,11 @@ def remove_cluster(cluster_id):
         user_id = session['user_id']
         user = User.query.get(user_id)
         if user.role.name == 'Admin':
+            trident = Trident.query.get_or_404(cluster_id)
             cluster = Cluster.query.get_or_404(cluster_id)
+            db.session.delete(trident)
             db.session.delete(cluster)
+            
             db.session.commit()
             # After deleting rows, reset the auto-increment counter
         else:

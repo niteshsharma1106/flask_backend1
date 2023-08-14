@@ -7,6 +7,7 @@ from views.auth import auth_bp
 from views.home import home_bp
 from views.ocpcluster import cluster_bp
 from views.admin import admin_bp
+from views.trident import trident_bp
 from flask_login import LoginManager
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
@@ -51,7 +52,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(home_bp)
 app.register_blueprint(cluster_bp)
 app.register_blueprint(admin_bp)
-
+app.register_blueprint(trident_bp)
 if __name__ == '__main__':
     app.run(debug=True)
     

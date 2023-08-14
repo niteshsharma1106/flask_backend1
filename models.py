@@ -2,12 +2,17 @@
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager
-from sqlalchemy import text
+from sqlalchemy import text, event, ForeignKey
+from datetime import datetime, timedelta
 
 db = SQLAlchemy()
 
 login_manager = LoginManager()
 
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 class Role(db.Model):
@@ -32,7 +37,6 @@ class Role(db.Model):
         db.session.commit()
 
 
-
 class AccessRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -40,8 +44,6 @@ class AccessRequest(db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
     role = db.relationship('Role')
     approved = db.Column(db.Boolean, default=False)
-
-
 
 
 class User(db.Model, UserMixin):
@@ -63,32 +65,44 @@ class User(db.Model, UserMixin):
             db.session.commit()
 
 
-
 class Cluster(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    data_center_location = db.Column(db.String(120), nullable=False)
-    cluster_type = db.Column(db.String(120), nullable=False)
-    cluster_api_address = db.Column(db.String(300), nullable=False,unique=True)
-    serial_number = db.Column(db.Integer, nullable=False, default=0)
+    __tablename__ = 'cluster'
+
+    id = db.Column(db.Integer, primary_key=True)
+    clusterapi = db.Column(db.String(200),unique=True,nullable=False)
+    #dctype = db.Column(db.String(200),nullable=False)
+    dcloc = db.Column(db.String(200),nullable=False)
+    ctype = db.Column(db.String(200),nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    tridents = db.relationship('Trident', back_populates='cluster')
+
     def save(self):
         if not self.id:
-            # Generate the next sequential number when saving a new record
-            last_cluster = Cluster.query.order_by(Cluster.serial_number.desc()).first()
-            self.serial_number = 1 if not last_cluster else last_cluster.serial_number + 1
-        db.session.add(self)
-        db.session.commit()
+            db.session.add(self)
+            db.session.commit()
+
 
     def delete(self):
         db.session.delete(self)
         db.session.commit()
-        # Recalculate sequential numbers after deleting a record
-        clusters = Cluster.query.order_by(Cluster.serial_number.asc()).all()
-        for i, cluster in enumerate(clusters, 1):
-            cluster.serial_number = i
+        
+class Trident(db.Model):
+    __tablename__ = 'trident'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    cluster_id = db.Column(db.Integer, db.ForeignKey('cluster.id'), nullable=False)
+    svmname = db.Column(db.String(200),nullable=True)
+    dataLF = db.Column(db.String(200),nullable=True)
+    last_password_updated_on = db.Column(db.DateTime, default=datetime.now())
+    cluster = db.relationship('Cluster', back_populates='tridents')
+
+    def save(self):
+        if not self.id:
+            db.session.add(self)
+            db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
         db.session.commit()
 
 
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))

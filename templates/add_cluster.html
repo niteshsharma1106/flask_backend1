@@ -49,13 +49,15 @@
             <th>Cluster API Address</th>
             <th>Data Center Location</th>
             <th>Cluster Type</th>
+            <th>Added Date</th>
             <th>Remove</th>
         </tr>
         {% for cluster in clusters %}
         <tr>
-            <td>{{ cluster.cluster_api_address }}</td>
-            <td>{{ cluster.data_center_location }}</td>
-            <td>{{ cluster.cluster_type }}</td>
+            <td>{{ cluster.clusterapi }}</td>
+            <td>{{ cluster.dcloc }}</td>
+            <td>{{ cluster.ctype }}</td>
+            <td>{{ cluster.created_at }}</td>
             <td><a href="/remove_cluster/{{ cluster.id }}">Remove</a></td>
         </tr>
         {% endfor %}
