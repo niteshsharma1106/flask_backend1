@@ -5,48 +5,30 @@
 {% block title %}Trident Data View{% endblock %}
 
 {% block content %}
-  <h2>Trident Data View</h2>
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Cluster API</th>
-        <th>SVM Name</th>
-        <th>Data LIEF IP</th>
-        <th>Last Password Updated</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for entry in trident_entries %}
-        <tr>
-          <td>{{ entry.cluster.clusterapi }}</td>
-          <td>{{ entry.svmname }}</td>
-          <td>{{ entry.dataLF }}</td>
-          <td>{{ entry.last_password_updated_on }}</td>
-          <td>
-            <form action="#" method="post">
-              <input type="submit" value="Fetch" class="btn btn-primary">
-             </form>
-            </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <!-- Add/Edit Form -->
-  <!-- <h2>Add/Edit Trident Data</h2>
-  <form method="post" action="{{ url_for('trident.trident_data_view') }}">
-    <label for="cluster_api">Cluster API Address:</label>
-    <input type="text" name="cluster_api" required>
-    <br>
-    <label for="svm_name">SVM Name:</label>
-    <input type="text" name="svm_name" required>
-    <br>
-    <label for="dataLF">Data LEAF IP:</label>
-    <input type="text" name="dataLF" required>
-    <br>
-    <label for="last_password_updated_on">Last Password Updated:</label>
-    <input type="text" name="last_password_updated_on" required>
-    <br>
-    <input type="submit" value="Submit">
-  </form> -->
+<h2>Trident Data View</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Cluster API</th>
+      <th>SVM Name</th>
+      <th>Data LIEF IP</th>
+      <th>Last Password Updated</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for entry in trident_entries %}
+    <tr>
+      <td>{{ entry.cluster.clusterapi }}</td>
+      <td>{{ entry.svmname }}</td>
+      <td>{{ entry.dataLF }}</td>
+      <td>{{ entry.last_password_updated_on }}</td>
+      <td>
+        <form action="{{ url_for('trident.fetch_requests', entry_id=entry.id) }}" method="post">
+          <input type="submit" value="Fetch" class="btn btn-primary">
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}

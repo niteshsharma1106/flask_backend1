@@ -18,29 +18,26 @@ def trident_data_view():
     if user.role.name != 'Admin':
         flash('You need to be an admin to access this page.', 'error')
         return redirect('/welcome')
-
-    # if request.method == 'POST':
-    #     cluster_api = request.form['cluster_api']
-    #     svm_name = request.form['svm_name']
-    #     dataLF = request.form['dataLF']
-    #     last_password_updated_on = request.form['last_password_updated_on']
-
-    #     # Create or update the Trident_Data entry
-    #     trident_entry = Trident.query.first()
-    #     if not trident_entry:
-    #         trident_entry = Trident()
-    #         db.session.add(trident_entry)
-    #     trident_entry.cluster_api_address_id = Cluster.query.filter_by(cluster_api_address=cluster_api).first().id
-    #     trident_entry.svm_name = svm_name
-    #     trident_entry.dataLF = dataLF
-    #     trident_entry.last_password_updated_on = last_password_updated_on
-    #     db.session.commit()
-
-    #     flash('Trident Data updated successfully.', 'success')
-
-    # Get all the entries from Trident_Data table
     trident_entries = Trident.query.all()
     print(trident_entries)
 
     return render_template('trident.html', trident_entries=trident_entries)
 
+
+@trident_bp.route('/fetch_requests/<int:entry_id>', methods=['POST'])
+def fetch_requests(entry_id):
+    print('Approve',entry_id)
+    if session['user_id']:
+        print('to Approve',entry_id)
+        user_id = session['user_id']
+        user = User.query.get(user_id)
+        if user.role.name == 'Admin':
+            print('calling function to fetch',entry_id)
+            trident_request = Trident.query.get(entry_id)
+            clusterapi = trident_request.cluster.clusterapi
+            print(f'Request to fetch for Cluster : {clusterapi}')
+            flash("Access request approved successfully.")
+        else:
+            flash("You don't have permission to approve requests.")
+            return redirect('welcome')
+    return redirect('/trident_data_view')
