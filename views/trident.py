@@ -1,9 +1,10 @@
 # views/trident.py
 
 from flask import Blueprint, render_template, redirect, request, session, flash
-from models import db, Cluster, User, Trident
+from models import db, Cluster, User, Trident,TridentSecret
 from views.auth import login_required
 import datetime
+from datetime import date
 
 trident_bp = Blueprint('trident', __name__)
 
@@ -41,3 +42,10 @@ def fetch_requests(entry_id):
             flash("You don't have permission to approve requests.")
             return redirect('welcome')
     return redirect('/trident_data_view')
+
+
+def datadelta():
+    pass
+
+
+#@trident_bp.route('/')

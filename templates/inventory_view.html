@@ -1,0 +1,21 @@
+<!-- templates/trident_data_view.html -->
+
+{% extends 'base.html' %}
+
+{% block title %}Inventory View{% endblock %}
+
+{% block content %}
+
+<form method="POST" action="/fetch_inventory">
+  <div class="form-floating col-md-4 container">
+    <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
+      <option selected>Open this select menu</option>
+      {% for cluster_entrie in cluster_entries %}
+        <option value="{ % for cluster_entrie in cluster_entries % }">{{ cluster_entrie.clusterapi }}</option>
+      {% endfor %}
+        </select>
+    <label for="floatingSelect form-label"> Select Cluster to View</label><br>
+    <button type="submit" class="btn btn-outline-primary btn-lg">Fetch</button>
+  </div>
+</form>>
+{% endblock %}

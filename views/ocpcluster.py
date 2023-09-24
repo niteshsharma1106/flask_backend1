@@ -1,7 +1,7 @@
 # views/cluster.py
 
 from flask import Blueprint, render_template, redirect, request,session,flash
-from models import db, Cluster, User,Trident
+from models import db, Cluster, User,Trident,TridentSecret
 from views.auth import login_required
 
 
@@ -16,10 +16,12 @@ def add_cluster():
         if user.role.name == 'Admin':
             if request.method == 'POST':
                 dcloc = request.form['data_center_location']
-                ctype = request.form['cluster_type']
+                ctype = request.form['cluster_env']
+                cenvironment = request.form['cluster_type']
                 clusterapi = request.form['cluster_api_address']
-                cluster = Cluster(dcloc=dcloc, ctype=ctype, clusterapi=clusterapi)
+                cluster = Cluster(dcloc=dcloc, ctype=ctype, clusterapi=clusterapi,cenvironment=cenvironment)
                 trident = Trident(cluster_id=cluster.id,svmname='',dataLF='')
+                tridentsecret = TridentSecret(cluster_id=cluster.id,password_en='',public_key='',pvt_key='')
                 # Check if the cluster_api_address already exists in the database
                 existing_cluster = Cluster.query.filter_by(clusterapi=clusterapi).first()
                 if existing_cluster:
@@ -29,6 +31,7 @@ def add_cluster():
                     # For simplicity, we redirect back to the add_cluster page
                     return redirect('/add_cluster')
                 cluster.tridents.append(trident)
+                cluster.tridentsecrets.append(tridentsecret)
                 db.session.add(cluster)
                 db.session.commit()
             clusters = Cluster.query.all()
@@ -47,8 +50,10 @@ def remove_cluster(cluster_id):
         user = User.query.get(user_id)
         if user.role.name == 'Admin':
             trident = Trident.query.get_or_404(cluster_id)
+            tridentsecret = TridentSecret.query.get_or_404(cluster_id)
             cluster = Cluster.query.get_or_404(cluster_id)
             db.session.delete(trident)
+            db.session.delete(tridentsecret)
             db.session.delete(cluster)
             
             db.session.commit()
