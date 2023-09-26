@@ -1,60 +1,62 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, DateTime
-from sqlalchemy.orm import sessionmaker, relationship, declarative_base
-from datetime import datetime
-from flask_sqlalchemy import SQLAlchemy
+import json
+import datetime
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-# Create a SQLite database in memory (you can change this to a file path)
-engine = create_engine('sqlite:///database1.db')
-Base = declarative_base()
-db = SQLAlchemy()
+# Load the JSON data from the file
+with open('trident_secret.json', 'r') as json_file:
+   data = json.load(json_file)
 
-class Cluster(Base):
-    __tablename__ = 'cluster'
+# Get all cluster API URLs
+cluster_api_urls = [api for api in data.keys()]
+
+# SMTP server configuration
+smtp_server_host = '10.56.131.8'  # Replace with your SMTP server's host
+smtp_server_port = 25  # Replace with your SMTP server's port
+
+# Connect to the SMTP server
+smtp_server = smtplib.SMTP(smtp_server_host, smtp_server_port)
+
+# Email configuration
+from_email = 'alert@trident.com'
+recipient_email = 'test@email.com'
+
+last_updated_str = "2023-08-10:00:00:00"
+
+for cluster_api_url in cluster_api_urls:
+    last_updated_str = data.get(cluster_api_url, {}).get("last_updated")
     
-    id = Column(Integer, primary_key=True)
-    clusterapi = db.Column(db.String(200),unique=True,nullable=False)
-    dctype = db.Column(db.String(200),nullable=False)
-    dcloc = db.Column(db.String(200),nullable=False)
-    ctype = db.Column(db.String(200),nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    tridents = db.relationship('Trident', back_populates='cluster')
-
-    def save(self):
-        if not self.id:
-            db.session.add(self)
-            db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-class Trident(Base):
-    __tablename__ = 'trident'
+    if last_updated_str:
+        last_updated = datetime.datetime.strptime(last_updated_str, "%Y-%m-%dT%H:%M:%S.%f")
+        current_date = datetime.datetime.now()
     
-    id = Column(Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('cluster.id'), nullable=False)
-    svmname = db.Column(db.String(200))
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
-    cluster = db.relationship('Cluster', back_populates='tridents')
+        # Calculate the difference in days
+        date_difference = (current_date - last_updated).days
+        #print(date_difference)
+    
+        # Check if the difference is less than 5 days
+        if date_difference > 70:
+            # Create the email message
+            subject = f"Your Trident User Password for Cluster {cluster_api_url} is about to Expire!!"
+            message = f"Your Trident User Password for Cluster {cluster_api_url} is about to Expire in {date_difference} Days!!."
+            msg = MIMEMultipart()
+            msg['From'] = from_email
+            msg['To'] = recipient_email
+            msg['Subject'] = subject
+            msg.attach(MIMEText(message, 'plain'))
+    
+            # Send the email
+            try:
+                text = msg.as_string()
+                smtp_server.sendmail(from_email, recipient_email, text)
+                print(f"Email sent for {cluster_api_url}.")
+            except Exception as e:
+                print(f"Failed to send email for {cluster_api_url}: {str(e)}")
+        else:
+            print(f"No email sent for {cluster_api_url} as the difference in days is ({date_difference}) .")
+    else:
+        print(f"Cluster API URL {cluster_api_url} not found in the JSON data.")
 
-Base.metadata.create_all(engine)
-
-# Example usage
-Session = sessionmaker(bind=engine)
-session = Session()
-
-new_cluster = Cluster(clusterapi='api_key', dctype='type', dcloc='location', type='cluster_type')
-new_trident = Trident(user_id=new_cluster.id, svmname='svm_name')
-new_cluster.tridents.append(new_trident)
-session.add(new_cluster)
-session.commit()
-
-
-new_cluster1 = Cluster(clusterapi='api_key2', dctype='type2', dcloc='location2', type='cluster_type2')
-new_trident1 = Trident(user_id=new_cluster.id, svmname='svm_name2')
-new_cluster1.tridents.append(new_trident1)
-session.add(new_cluster1)
-session.commit()
-
-
-session.close()
+# Quit the SMTP server
+smtp_server.quit()

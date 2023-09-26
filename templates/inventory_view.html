@@ -6,12 +6,12 @@
 
 {% block content %}
 
-<form method="POST" action="/fetch_inventory">
+<form method="post" action="/inventory_fetch">
   <div class="form-floating col-md-4 container">
-    <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
-      <option selected>Open this select menu</option>
+    <select class="form-select" id="floatingSelect" aria-label="Floating label select example" name="c_fetch">
+      <option value="" disabled selected hidden>Please Choose...</option>
       {% for cluster_entrie in cluster_entries %}
-        <option value="{ % for cluster_entrie in cluster_entries % }">{{ cluster_entrie.clusterapi }}</option>
+        <option value="{{ cluster_entrie.clusterapi }}">{{ cluster_entrie.clusterapi }}</option>
       {% endfor %}
         </select>
     <label for="floatingSelect form-label"> Select Cluster to View</label><br>

@@ -21,22 +21,33 @@
     <form method="POST" action="/add_cluster">
         <div class="container-md">
             <h3>Cluster Table</h2>
-                <div class="mb-3"> 
-                    <label for="data_center_location" class="form-label">Data Center Location</label>
-                    <input type="text" name="data_center_location" class="form-control" id="data_center_location" aria-describedby="DC-Location" placeholder="N1/N2/BLR" required>
-                    <!-- <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div> -->
+                  <div class="mb-3"> 
+                    <label for="data_center_location" class="form-label">Cluster Environment</label>
+                    <select class="form-select" id="data_center_location" aria-label="Floating label select example" name="data_center_location">
+                      <option selected>Select DataCenter Location</option>
+                      <option value="N1">Test</option>
+                      <option value="N2">Production</option>
+                      <option value="Banglore">Banglore</option>
+                    </select>
                   </div>
 
                   <div class="mb-3"> 
                     <label for="cluster_type" class="form-label">Cluster Type</label>
-                    <input type="text" name="cluster_type" class="form-control" id="cluster_type" aria-describedby="Cluster Type" placeholder="Physical/Virtual" required>
-                    <!-- <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div> -->
+                    <select class="form-select" id="cluster_type" aria-label="Floating label select example" name="cluster_type">
+                      <option selected>Select Cluster Build Type</option>
+                      <option value="Physical">Physical</option>
+                      <option value="Pirtual">Virtual</option>
+                    </select>
                   </div>
 
                   <div class="mb-3"> 
                     <label for="cluster_env" class="form-label">Cluster Environment</label>
-                    <input type="text" name="cluster_env" class="form-control" id="cluster_env" aria-describedby="DC-Type" placeholder="Test/Production/Staging" required>
-                    <!-- <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div> -->
+                    <select class="form-select" id="cluster_env" aria-label="Floating label select example" name="cluster_env">
+                      <option selected>Select Cluster Environment</option>
+                      <option value="Test">Test</option>
+                      <option value="Production">Production</option>
+                      <option value="Staging">Staging</option>
+                    </select>
                   </div>
 
                   <div class="mb-3"> 
