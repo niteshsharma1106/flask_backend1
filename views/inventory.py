@@ -1,7 +1,7 @@
 # views/inventory.py
 
 from flask import Blueprint, render_template, redirect, request, session, flash
-from models import db, Cluster, User, Inventory
+from models import db, Cluster, User
 from views.auth import login_required
 import datetime
 from datetime import date
@@ -31,9 +31,11 @@ def inventory_fetch():
             user_id = session['user_id']
             user = User.query.get(user_id)
             if user.role.name == 'Admin':
-                fetch_inv_auth('https://api.n1okd-pclus03.india.airtel.itm:6443')  #(request.form.get('c_fetch'))
+                nodes_info = fetch_inv_auth('https://api.n1okd-pclus03.india.airtel.itm:6443')  #(request.form.get('c_fetch'))
                 print('calling inventory function to fetch')
                 flash("Access request approved successfully.")
+                cluster_entries = Cluster.query.order_by(Cluster.clusterapi).all()
+                return render_template('inventory_view.html', cluster_entries=cluster_entries, nodes_info=nodes_info)
             else:
                 flash("You don't have permission to approve requests.")
                 return redirect('welcome')
@@ -58,11 +60,14 @@ def fetch_inv_from_cluster(oc_dyn_client):
         try:
             #logging.debug(f'Checking if project {project_name} is already present'.title())
             node_data = nodes.get()
-            node_data = node_data.items
+            node_data = node_data
+            #print("-------->",[data['metadata']['name'] for data in node_data.items])
+                  #node_data.items[0].keys())
             nodes_info = extract_node_info(node_data)
-            print("Node Information:")
-            for key, value in nodes_info.items():
-                print(f"{key}: {value}")
+            #print("Node Information:",nodes_info)
+            for val in nodes_info:
+                 print(f"{val}")
+            return nodes_info
             ## also add login to check if Project with same RITM exits
             #existing_project_ritm = existing_project["metadata"]["annotations"]["openshift.io/ritm"]
         except client.exceptions.ApiException as e:
@@ -72,46 +77,53 @@ def fetch_inv_from_cluster(oc_dyn_client):
             return 0
         
 def extract_node_info(node_data):
-    node_info = {}
-
-    # Extract Name
-    node_info['Name'] = node_data['metadata']['name']
-
-    # Extract IP Address (ExternalIP if available, otherwise InternalIP)
-    addresses = node_data['status']['addresses']
-    for address in addresses:
-        if address['type'] == 'ExternalIP':
-            node_info['IP Address'] = address['address']
-            break
-    else:
-        # If ExternalIP is not available, use InternalIP
+    nodes_info_list = []
+    #[data['metadata']['name'] for data in node_data.items])
+    for nodes_data in node_data.items:
+        node_info = {}
+        # Extract Name
+        node_info['Name'] = nodes_data['metadata']['name']
+        #print("====",node_info)
+        # Extract IP Address (ExternalIP if available, otherwise InternalIP)
+        addresses = nodes_data['status']['addresses']
         for address in addresses:
-            if address['type'] == 'InternalIP':
-                node_info['IP Address'] = address['address']
+            if address['type'] == 'ExternalIP':
+                node_info['IP_Address'] = address['address']
                 break
+        else:
+            # If ExternalIP is not available, use InternalIP
+            for address in addresses:
+                if address['type'] == 'InternalIP':
+                    node_info['IP_Address'] = address['address']
+                    break
 
-    # Extract Role (based on labels)
-    labels = node_data['metadata']['labels']
-    if 'node-role.kubernetes.io/worker' in labels:
-        node_info['Role'] = 'Worker'
-    elif 'node-role.kubernetes.io/master' in labels:
-        node_info['Role'] = 'Master'
-    else:
-        node_info['Role'] = 'Unknown'
+        # Extract Role (based on labels)
+        labels = nodes_data['metadata']['labels']
+        #print((labels.keys()))
+        if 'node-role.kubernetes.io/worker' in labels.keys():
+            node_info['Role'] = 'Worker'
+        elif 'node-role.kubernetes.io/master' in labels.keys():
+            node_info['Role'] = 'Master'
+        else:
+            node_info['Role'] = 'Unknown'
 
-    # Extract Status (Ready/Not Ready)
-    conditions = node_data['status']['conditions']
-    for condition in conditions:
-        if condition['type'] == 'Ready':
-            node_info['Status'] = 'Ready' if condition['status'] == 'True' else 'Not Ready'
-            break
-    else:
-        node_info['Status'] = 'Unknown'
+        # Extract Status (Ready/Not Ready)
+        conditions = nodes_data['status']['conditions']
+        for condition in conditions:
+            if condition['type'] == 'Ready':
+                node_info['Status'] = 'Ready' if condition['status'] == 'True' else 'Not Ready'
+                break
+        else:
+            node_info['Status'] = 'Unknown'
 
-    # Extract machineconfiguration.openshift.io/state
-    annotations = node_data['metadata']['annotations']
-    node_info['machineconfiguration.openshift.io/state'] = annotations.get(
-        'machineconfiguration.openshift.io/state', 'N/A'
-    )
+        # Extract machineconfiguration.openshift.io/state
+        annotations = nodes_data['metadata']['annotations']
+        node_info['machineconfig_state'] = annotations.get(
+            'machineconfiguration.openshift.io/state', 'N/A'
+        )
+        #print(node_info)
+        #print('\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\')
+        nodes_info_list.append(node_info)
+    #print("11111111111111111111111",nodes_info)
 
-    return node_info
+    return nodes_info_list

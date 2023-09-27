@@ -2,7 +2,7 @@
 
 from flask import Flask
 from config import DATABASE_URI
-from models import db, login_manager,Role,User
+from models import db, login_manager,Role,User,Inventory
 from views.auth import auth_bp
 from views.home import home_bp
 from views.ocpcluster import cluster_bp

@@ -17,5 +17,27 @@
     <label for="floatingSelect form-label"> Select Cluster to View</label><br>
     <button type="submit" class="btn btn-outline-primary btn-lg">Fetch</button>
   </div>
-</form>>
+</form>
+
+
+<table border="1" class="table table-bordered border-primary">
+  <tr>
+      <th>Node Name</th>
+      <th>IP Address</th>
+      <th>Role</th>
+      <th>Status</th>
+      <th>MC Sync</th>
+  </tr>
+  {% for node_info in nodes_info %}
+  <tr>
+      <td>{{ node_info.Name }}</td>
+      <td>{{ node_info.IP_Address }}</td>
+      <td>{{ node_info.Role }}</td>
+      <td>{{ node_info.Status }}</td>
+      <td>{{ node_info.machineconfig_state }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+
 {% endblock %}
