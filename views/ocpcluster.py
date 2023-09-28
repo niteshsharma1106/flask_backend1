@@ -55,7 +55,6 @@ def remove_cluster(cluster_id):
             db.session.delete(trident)
             db.session.delete(tridentsecret)
             db.session.delete(cluster)
-            
             db.session.commit()
             # After deleting rows, reset the auto-increment counter
         else:

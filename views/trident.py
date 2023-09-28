@@ -4,11 +4,11 @@ from flask import Blueprint, render_template, redirect, request, session, flash
 from models import db, Cluster, User, Trident,TridentSecret
 from views.auth import login_required
 import datetime
-from datetime import date
-
+from datetime import date, datetime
+import json
 trident_bp = Blueprint('trident', __name__)
 
-# Create new Cluster and Trident_Data records with a relationship
+#Create new Cluster and Trident_Data records with a relationship
 
 
 @trident_bp.route('/trident_data_view', methods=['GET', 'POST'])
@@ -35,8 +35,16 @@ def fetch_requests(entry_id):
         if user.role.name == 'Admin':
             print('calling function to fetch',entry_id)
             trident_request = Trident.query.get(entry_id)
+            print('--->',trident_request.last_password_updated_on)
             clusterapi = trident_request.cluster.clusterapi
             print(f'Request to fetch for Cluster : {clusterapi}')
+            data = fetch_trident_data()
+            last_update = data[clusterapi]['last_updated']
+            datetime_object = datetime.strptime(last_update, "%Y-%m-%dT%H:%M:%S.%f")
+            print(type(last_update))
+            trident_request.last_password_updated_on = datetime_object
+            db.session.flush()
+            db.session.commit()
             flash("Access request approved successfully.")
         else:
             flash("You don't have permission to approve requests.")
@@ -48,4 +56,15 @@ def datadelta():
     pass
 
 
-#@trident_bp.route('/')
+def fetch_trident_data():
+    with open('trident_secret.json') as secret_data:
+        content = json.load(secret_data)
+        secret_data.close
+    print('Fetching Data for the required Cluster')
+    for data in content:
+        print(f"Last Update Password for Cluster {data} is {content[data]['last_updated']}")
+    return content
+
+
+
+#fetch_trident_data()
