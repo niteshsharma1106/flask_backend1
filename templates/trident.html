@@ -1,7 +1,6 @@
 <!-- templates/trident_data_view.html -->
 
 {% extends 'base.html' %}
-
 {% block title %}Trident Data View{% endblock %}
 
 {% block content %}
@@ -27,8 +26,14 @@
           <input type="submit" value="Fetch" class="btn btn-primary">
         </form>
       </td>
+      <td>
+        <form action="{{ url_for('trident.reset_password', entry_id=entry.id) }}" method="post">
+          <button type="submit" class="btn btn-danger reset-button" data-updated="{{ entry.last_password_updated_on }}" >Password</button>
+      </form>
+      </td>
     </tr>
     {% endfor %}
   </tbody>
 </table>
+<script src="static\js\password_reset.js"></script>
 {% endblock %}

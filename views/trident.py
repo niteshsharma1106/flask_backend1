@@ -1,11 +1,12 @@
 # views/trident.py
 
-from flask import Blueprint, render_template, redirect, request, session, flash
+from flask import Blueprint, render_template, redirect, request, session, flash,jsonify
 from models import db, Cluster, User, Trident,TridentSecret
 from views.auth import login_required
 import datetime
 from datetime import date, datetime
 import json
+import subprocess
 trident_bp = Blueprint('trident', __name__)
 
 #Create new Cluster and Trident_Data records with a relationship
@@ -52,8 +53,20 @@ def fetch_requests(entry_id):
     return redirect('/trident_data_view')
 
 
-def datadelta():
-    pass
+@trident_bp.route('/reset_password/<int:entry_id>', methods=['POST'])
+def reset_password(entry_id):
+    trident_request = Trident.query.get(entry_id)
+    
+    command = ['python', 'D:\/vCodes\/trident_ss\main.py', f'{trident_request.cluster.clusterapi}']
+    print(f"Rest Password for cluster : {trident_request.cluster.clusterapi}, command is {command}")
+    try:
+        # Run the command
+        subprocess.run(command, check=True)
+        return jsonify({'Process':'Reset Process is started kindly check the logs at server'})
+    except subprocess.CalledProcessError as e:
+        # Handle any errors or exceptions
+        print(f"Error: {e}")
+        return jsonify({'Error':'An Error Occured and password is not updated, Check server side error'})
 
 
 def fetch_trident_data():
